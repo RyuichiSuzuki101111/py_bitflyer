@@ -138,6 +138,10 @@ class Context:
                 return f'{base_path}/{self.region.lower()}'
 
     def getmarket(self) -> Response:
-
         path = self._get_regionwise_path('/v1/markets')
         return self.send_public_request(False, 'GET', path)
+
+    def getboard(self, product_code: str = None) -> Response:
+        path = '/v1/getboard'
+        query = {'product_code': product_code}
+        return self.send_public_request(True, 'GET', path, query)
