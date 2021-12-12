@@ -113,10 +113,10 @@ class Context:
         url = f'{self.endpoint}{path}'
 
         if depends_on_market:
-            # NOTE: If not specified, add suitable 'product_code' to 'query' by context.
-            assert hasattr(self, 'market') or \
-                query.get('product_code') is not None
-            query.setdefault('product_code', self.market.product_code)
+            # NOTE: If both 'product_code' and 'alias' are not specified in 'query',
+            #       add suitable 'product_code' to 'query' by context.
+            if (query.get('product_code') is None) and (query.get('alias') is None):
+                query['product_code'] = self.market.product_code
 
         if len(query) == 0:
             url += '?' + urlencode(query)
@@ -141,18 +141,22 @@ class Context:
         path = self._get_regionwise_path('/v1/markets')
         return self.send_public_request(False, 'GET', path)
 
-    def getboard(self, product_code: str = None) -> Response:
+    def getboard(self, *, product_code: str = None, alias: str = None) -> Response:
         """
         Send the getboard request.
         If specified, product_code is used in preference to the context.
         """
         path = '/v1/getboard'
+        assert (product_code is not None) + (alias is not None) <= 1
         query = {}
         if product_code is not None:
             query['product_code'] = product_code
+        if alias is not None:
+            query['alias'] = alias
+
         return self.send_public_request(True, 'GET', path, query)
 
-    def getticker(self, product_code: str = None) -> Response:
+    def getticker(self, *, product_code: str = None, alias: str = None) -> Response:
         """
         Send the getticker request.
         If specified, product_code is used in preference to the context.
