@@ -1,9 +1,10 @@
-import datetime
 import json
+from datetime import datetime
+from hashlib import sha256
+from hmac import HMAC
 from typing import Final, Generator, Literal
 from urllib.parse import urlencode
-from hmac import HMAC
-from hashlib import sha256
+
 from requests import Response, request
 
 Region: Final = Literal['JP', 'USA', 'EU']
@@ -258,11 +259,11 @@ class Context:
         Send the getpermissions request.
         """
         path = '/v1/me/getpermissionss'
-        return self.send_request('GET', path)
+        return self.send_request('GET', path, add_headers=True)
 
     def me_getbalance(self) -> Response:
         """
         Send the getpermissions request.
         """
         path = '/v1/me/getbalance'
-        return self.send_request('GET', path)
+        return self.send_request('GET', path, add_headers=True)
