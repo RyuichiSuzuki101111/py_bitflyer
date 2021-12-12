@@ -145,7 +145,8 @@ class Context:
             'Content-Type': 'application/json'
         }
 
-    def send_request(self, method: str, path: str, query: dict = {}, data: dict = {}, add_headers: bool = False):
+    def send_request(self, method: str, path: str, query: dict = {},
+                     data: dict = {}, add_headers: bool = False) -> Response:
 
         url = f'{self.endpoint}{path}'
 
@@ -198,7 +199,7 @@ class Context:
         return self.send_request('GET', path, query)
 
     def getexecutions(self, *, product_code: str = None, alias: str = None,
-                      count: int = None, before: int = None, after: int = None):
+                      count: int = None, before: int = None, after: int = None) -> Response:
         """
         Send the getexecutions request.
         If specified, product_code or alias are used in preference to the context.
@@ -212,7 +213,7 @@ class Context:
         query = {key: value for key, value in gen_query()}
         return self.send_request('GET', path, query)
 
-    def getboardstate(self, *, product_code: str = None, alias: str = None):
+    def getboardstate(self, *, product_code: str = None, alias: str = None) -> Response:
         """
         Send the getboardstate request.
         If specified, product_code or alias are used in preference to the context.
@@ -222,7 +223,7 @@ class Context:
                  gen_market_data(self, product_code, alias)}
         return self.send_request('GET', path, query)
 
-    def gethealth(self, *, product_code: str = None, alias: str = None):
+    def gethealth(self, *, product_code: str = None, alias: str = None) -> Response:
         """
         Send the getboardstate request.
         If specified, product_code or alias are used in preference to the context.
@@ -232,14 +233,14 @@ class Context:
                  gen_market_data(self, product_code, alias)}
         return self.send_request('GET', path, query)
 
-    def getcorporateleverage(self):
+    def getcorporateleverage(self) -> Response:
         """
         Send the getcorporateleverage request.
         """
         path = '/v1/getcorporateleverage'
         return self.send_request('GET', path)
 
-    def getchats(self, from_date: str = None):
+    def getchats(self, from_date: str = None) -> Response:
         """
         Send the getchats request.
         query parameter from_date is expected to be of the form 'yyyy-mm-dd'.
@@ -252,14 +253,14 @@ class Context:
         path = self._get_regionwise_path('/v1/getchats')
         return self.send_request('GET', path, query)
 
-    def me_getpermissions(self):
+    def me_getpermissions(self) -> Response:
         """
         Send the getpermissions request.
         """
         path = '/v1/me/getpermissionss'
         return self.send_request('GET', path)
 
-    def me_getbalance(self):
+    def me_getbalance(self) -> Response:
         """
         Send the getpermissions request.
         """
