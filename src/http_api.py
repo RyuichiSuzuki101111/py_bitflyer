@@ -2,7 +2,7 @@ import json
 from typing import Final, Generator, Literal
 from urllib.parse import urlencode
 
-from requests import request, Response
+from requests import Response, request
 
 Region: Final = Literal['JP', 'USA', 'EU']
 
@@ -212,6 +212,22 @@ class Context:
                  gen_market_data(self, product_code, alias)}
         return self.send_public_request('GET', path, query)
 
+    def getcorporateleverage(self):
+        """
+        Send the getcorporateleverage request.
+        """
+        path = '/v1/getcorporateleverage'
+        return self.send_public_request('GET', path)
 
-cnx = Context('JP', 'BTC_JPY')
-print(cnx.getboardstate().text)
+    def getchats(self, from_date: str = None):
+        """
+        Send the getchats request.
+        query parameter from_date is expected to be of the form 'yyyy-mm-dd'.
+        """
+        if from_date is not None:
+            query = {'from_date': from_date}
+        else:
+            query = {}
+
+        path = self._get_regionwise_path('/v1/getchats')
+        return self.send_public_request('GET', path, query)
