@@ -266,3 +266,10 @@ class Context:
         """
         path = '/v1/me/getbalance'
         return self.send_request('GET', path)
+
+    def me_getaddresses(self) -> Response:
+        """
+        Send the getaddresses request.
+        """
+        path = '/v1/me/getaddresses'
+        return self.send_request('GET', path)
