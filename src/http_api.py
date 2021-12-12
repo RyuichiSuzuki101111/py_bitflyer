@@ -251,3 +251,10 @@ class Context:
 
         path = self._get_regionwise_path('/v1/getchats')
         return self.send_request('GET', path, query)
+
+    def me_getpermissions(self):
+        """
+        Send the getpermissions request.
+        """
+        path = '/v1/me/getpermissionss'
+        return self.send_request('GET', path)
