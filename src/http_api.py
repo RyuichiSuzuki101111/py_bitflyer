@@ -202,6 +202,16 @@ class Context:
                  gen_market_data(self, product_code, alias)}
         return self.send_public_request('GET', path, query)
 
+    def gethealth(self, *, product_code: str = None, alias: str = None):
+        """
+        Send the getboardstate request.
+        If specified, product_code or alias are used in preference to the context.
+        """
+        path = '/v1/gethealth'
+        query = {key: value for key, value in
+                 gen_market_data(self, product_code, alias)}
+        return self.send_public_request('GET', path, query)
+
 
 cnx = Context('JP', 'BTC_JPY')
 print(cnx.getboardstate().text)
