@@ -60,17 +60,19 @@ class Market:
         pass
 
 
-def market_data(cxt: 'Context', product_code: str = None, alias: str = None) -> tuple[str, str]:
+def gen_market_data(cxt: 'Context', product_code: str = None, alias: str = None) -> Generator[tuple[str, str], None, None]:
+    # used to add product_code or alias to request body or query.
 
     if product_code is not None:
-        return 'product_code', product_code
+        yield 'product_code', product_code
     elif alias is not None:
-        return 'alias', alias
+        yield 'alias', alias
     else:
-        return 'product_code', cxt.market.product_code
+        yield 'product_code', cxt.market.product_code
 
 
 def gen_pagenation(count: int = None, before: int = None, after: int = None) -> Generator[tuple[str, str], None, None]:
+    # used to add pagenation to query.
 
     if count is not None:
         yield 'count', count
@@ -161,31 +163,45 @@ class Context:
         If specified, product_code or alias are used in preference to the context.
         """
         path = '/v1/getboard'
-        product_code_or_alias, value = market_data(self, product_code, alias)
-        query = {product_code_or_alias: value}
+        query = {key: value for key, value in
+                 gen_market_data(self, product_code, alias)}
         return self.send_public_request('GET', path, query)
 
     def getticker(self, *, product_code: str = None, alias: str = None) -> Response:
         """
         Send the getticker request.
-        If specified, product_code or alias used in preference to the context.
+        If specified, product_code or alias are used in preference to the context.
         """
         path = '/v1/getticker'
-        product_code_or_alias, value = market_data(self, product_code, alias)
-        query = {product_code_or_alias: value}
+        query = {key: value for key, value in
+                 gen_market_data(self, product_code, alias)}
         return self.send_public_request('GET', path, query)
 
     def getexecutions(self, *, product_code: str = None, alias: str = None,
                       count: int = None, before: int = None, after: int = None):
         """
         Send the getexecutions request.
-        If specified, product_code or alias used in preference to the context.
+        If specified, product_code or alias are used in preference to the context.
         """
         path = '/v1/getexecutions'
 
         def gen_query():
-            yield market_data(self, product_code, alias)
+            yield from gen_market_data(self, product_code, alias)
             yield from gen_pagenation(count, before, after)
 
         query = {key: value for key, value in gen_query()}
         return self.send_public_request('GET', path, query)
+
+    def getboardstate(self, *, product_code: str = None, alias: str = None):
+        """
+        Send the getboardstate request.
+        If specified, product_code or alias are used in preference to the context.
+        """
+        path = '/v1/getboardstate'
+        query = {key: value for key, value in
+                 gen_market_data(self, product_code, alias)}
+        return self.send_public_request('GET', path, query)
+
+
+cnx = Context('JP', 'BTC_JPY')
+print(cnx.getboardstate().text)
