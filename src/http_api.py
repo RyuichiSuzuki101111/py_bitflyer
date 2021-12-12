@@ -147,5 +147,7 @@ class Context:
         If specified, product_code is used in preference to the context.
         """
         path = '/v1/getboard'
-        query = {'product_code': product_code}
+        query = {}
+        if product_code is not None:
+            query['product_code'] = product_code
         return self.send_public_request(True, 'GET', path, query)
