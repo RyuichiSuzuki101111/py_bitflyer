@@ -1,7 +1,9 @@
+import datetime
 import json
 from typing import Final, Generator, Literal
 from urllib.parse import urlencode
-
+from hmac import HMAC
+from hashlib import sha256
 from requests import Response, request
 
 Region: Final = Literal['JP', 'USA', 'EU']
@@ -130,7 +132,20 @@ class Context:
         self.key: str = key
         self.secret: bytes = secret.encode('utf8')
 
-    def send_public_request(self, method: str, path: str, query: dict = {}, data: dict = {}):
+    def _create_header(self, method: Literal['GET', 'POST'], path: str, data: str):
+
+        timestamp = str(datetime.now().timestamp())
+        msg = f'{timestamp}{method}{path}{data}'.encode('utf8')
+        sign = HMAC(self.secret, msg, sha256).hexdigest()
+
+        return {
+            'ACCESS-KEY': self.key,
+            'ACCESS-TIMESTAMP': timestamp,
+            'ACCESS-SIGN': sign,
+            'Content-Type': 'application/json'
+        }
+
+    def send_request(self, method: str, path: str, query: dict = {}, data: dict = {}, add_headers: bool = False):
 
         url = f'{self.endpoint}{path}'
 
@@ -143,7 +158,12 @@ class Context:
         else:
             data_str = json.dumps(data)
 
-        return request(method, url, data=data_str)
+        if add_headers:
+            headers = self._create_header(method, path, data_str)
+        else:
+            headers = None
+
+        return request(method, url, data=data_str, headers=headers)
 
     def _get_regionwise_path(self, base_path: str) -> str:
         # REVIEW: This probably works fine.
@@ -155,7 +175,7 @@ class Context:
 
     def getmarket(self) -> Response:
         path = self._get_regionwise_path('/v1/markets')
-        return self.send_public_request('GET', path)
+        return self.send_request('GET', path)
 
     def getboard(self, *, product_code: str = None, alias: str = None) -> Response:
         """
@@ -165,7 +185,7 @@ class Context:
         path = '/v1/getboard'
         query = {key: value for key, value in
                  gen_market_data(self, product_code, alias)}
-        return self.send_public_request('GET', path, query)
+        return self.send_request('GET', path, query)
 
     def getticker(self, *, product_code: str = None, alias: str = None) -> Response:
         """
@@ -175,7 +195,7 @@ class Context:
         path = '/v1/getticker'
         query = {key: value for key, value in
                  gen_market_data(self, product_code, alias)}
-        return self.send_public_request('GET', path, query)
+        return self.send_request('GET', path, query)
 
     def getexecutions(self, *, product_code: str = None, alias: str = None,
                       count: int = None, before: int = None, after: int = None):
@@ -190,7 +210,7 @@ class Context:
             yield from gen_pagenation(count, before, after)
 
         query = {key: value for key, value in gen_query()}
-        return self.send_public_request('GET', path, query)
+        return self.send_request('GET', path, query)
 
     def getboardstate(self, *, product_code: str = None, alias: str = None):
         """
@@ -200,7 +220,7 @@ class Context:
         path = '/v1/getboardstate'
         query = {key: value for key, value in
                  gen_market_data(self, product_code, alias)}
-        return self.send_public_request('GET', path, query)
+        return self.send_request('GET', path, query)
 
     def gethealth(self, *, product_code: str = None, alias: str = None):
         """
@@ -210,14 +230,14 @@ class Context:
         path = '/v1/gethealth'
         query = {key: value for key, value in
                  gen_market_data(self, product_code, alias)}
-        return self.send_public_request('GET', path, query)
+        return self.send_request('GET', path, query)
 
     def getcorporateleverage(self):
         """
         Send the getcorporateleverage request.
         """
         path = '/v1/getcorporateleverage'
-        return self.send_public_request('GET', path)
+        return self.send_request('GET', path)
 
     def getchats(self, from_date: str = None):
         """
@@ -230,4 +250,4 @@ class Context:
             query = {}
 
         path = self._get_regionwise_path('/v1/getchats')
-        return self.send_public_request('GET', path, query)
+        return self.send_request('GET', path, query)
