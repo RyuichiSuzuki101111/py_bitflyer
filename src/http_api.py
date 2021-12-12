@@ -151,3 +151,14 @@ class Context:
         if product_code is not None:
             query['product_code'] = product_code
         return self.send_public_request(True, 'GET', path, query)
+
+    def getticker(self, product_code: str = None) -> Response:
+        """
+        Send the getticker request.
+        If specified, product_code is used in preference to the context.
+        """
+        path = '/v1/getticker'
+        query = {}
+        if product_code is not None:
+            query['product_code'] = product_code
+        return self.send_public_request(True, 'GET', path, query)
