@@ -267,3 +267,17 @@ class Context:
         """
         path = '/v1/me/getbalance'
         return self.send_request('GET', path, add_headers=True)
+
+    def me_getcollateral(self) -> Response:
+        """
+        Send the getcollateral request.
+        """
+        path = '/v1/me/getcollateral'
+        return self.send_request('GET', path, add_headers=True)
+
+    def me_getcollateralaccounts(self) -> Response:
+        """
+        Send the getcollateralaccounts request.
+        """
+        path = '/v1/me/getcollateralaccounts'
+        return self.send_request('GET', path, add_headers=True)
