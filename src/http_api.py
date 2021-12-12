@@ -113,7 +113,7 @@ class Context:
         url = f'{self.endpoint}{path}'
 
         if depends_on_market:
-            # NOTE: If not be specified explicitly, add suitable 'product_code' to 'query' by context.
+            # NOTE: If not specified, add suitable 'product_code' to 'query' by context.
             assert hasattr(self, 'market') or \
                 query.get('product_code') is not None
             query.setdefault('product_code', self.market.product_code)
