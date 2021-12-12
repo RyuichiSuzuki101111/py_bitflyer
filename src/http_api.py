@@ -142,6 +142,10 @@ class Context:
         return self.send_public_request(False, 'GET', path)
 
     def getboard(self, product_code: str = None) -> Response:
+        """
+        Send the getboard request.
+        If specified, product_code is used in preference to the context.
+        """
         path = '/v1/getboard'
         query = {'product_code': product_code}
         return self.send_public_request(True, 'GET', path, query)
