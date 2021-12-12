@@ -9,8 +9,12 @@ Region: Final = Literal['JP', 'USA', 'EU']
 
 class Market:
 
-    __slots__ = ('product_code', 'market_type', 'alias')
+    __slots__ = ('product_code', 'alias', 'market_type')
     _markets: dict[str, 'Market']
+
+    product_code: str
+    alias: str
+    market_type: Literal['Spot', 'FX', 'Futures']
 
     def __new__(cls, cxt: 'Context', *, product_code: str = None, alias: str = None):
 
