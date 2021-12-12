@@ -1,5 +1,5 @@
 import json
-from typing import Final, Literal
+from typing import Final, Generator, Literal
 from urllib.parse import urlencode
 
 from requests import request, Response
@@ -60,6 +60,26 @@ class Market:
         pass
 
 
+def market_data(cxt: 'Context', product_code: str = None, alias: str = None) -> tuple[str, str]:
+
+    if product_code is not None:
+        return 'product_code', product_code
+    elif alias is not None:
+        return 'alias', alias
+    else:
+        return 'product_code', cxt.market.product_code
+
+
+def gen_pagenation(count: int = None, before: int = None, after: int = None) -> Generator[tuple[str, str], None, None]:
+
+    if count is not None:
+        yield 'count', count
+    if before is not None:
+        yield 'before', before
+    if after is not None:
+        yield 'after', after
+
+
 class Context:
 
     __slots__ = ('region', 'market', 'key', 'secret')
@@ -108,15 +128,9 @@ class Context:
         self.key: str = key
         self.secret: bytes = secret.encode('utf8')
 
-    def send_public_request(self, depends_on_market: bool, method: str, path: str, query: dict = {}, data: dict = {}):
+    def send_public_request(self, method: str, path: str, query: dict = {}, data: dict = {}):
 
         url = f'{self.endpoint}{path}'
-
-        if depends_on_market:
-            # NOTE: If both 'product_code' and 'alias' are not specified in 'query',
-            #       add suitable 'product_code' to 'query' by context.
-            if (query.get('product_code') is None) and (query.get('alias') is None):
-                query['product_code'] = self.market.product_code
 
         if len(query) == 0:
             url += '?' + urlencode(query)
@@ -139,30 +153,39 @@ class Context:
 
     def getmarket(self) -> Response:
         path = self._get_regionwise_path('/v1/markets')
-        return self.send_public_request(False, 'GET', path)
+        return self.send_public_request('GET', path)
 
     def getboard(self, *, product_code: str = None, alias: str = None) -> Response:
         """
         Send the getboard request.
-        If specified, product_code is used in preference to the context.
+        If specified, product_code or alias are used in preference to the context.
         """
         path = '/v1/getboard'
-        assert (product_code is not None) + (alias is not None) <= 1
-        query = {}
-        if product_code is not None:
-            query['product_code'] = product_code
-        if alias is not None:
-            query['alias'] = alias
-
-        return self.send_public_request(True, 'GET', path, query)
+        product_code_or_alias, value = market_data(self, product_code, alias)
+        query = {product_code_or_alias: value}
+        return self.send_public_request('GET', path, query)
 
     def getticker(self, *, product_code: str = None, alias: str = None) -> Response:
         """
         Send the getticker request.
-        If specified, product_code is used in preference to the context.
+        If specified, product_code or alias used in preference to the context.
         """
         path = '/v1/getticker'
-        query = {}
-        if product_code is not None:
-            query['product_code'] = product_code
-        return self.send_public_request(True, 'GET', path, query)
+        product_code_or_alias, value = market_data(self, product_code, alias)
+        query = {product_code_or_alias: value}
+        return self.send_public_request('GET', path, query)
+
+    def getexecutions(self, *, product_code: str = None, alias: str = None,
+                      count: int = None, before: int = None, after: int = None):
+        """
+        Send the getexecutions request.
+        If specified, product_code or alias used in preference to the context.
+        """
+        path = '/v1/getexecutions'
+
+        def gen_query():
+            yield market_data(self, product_code, alias)
+            yield from gen_pagenation(count, before, after)
+
+        query = {key: value for key, value in gen_query()}
+        return self.send_public_request('GET', path, query)
