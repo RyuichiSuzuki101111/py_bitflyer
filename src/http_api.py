@@ -317,3 +317,12 @@ class Context:
         """
         path = '/v1/me/getbankaccounts'
         return self.send_request('GET', path, add_header=True)
+
+    def me_getdeposits(self, count: int = None,
+                       before: int = None,
+                       after: int = None):
+        """
+        Send the getdeposits request.
+        """
+        path = '/v1/me/getdeposits'
+        return self.send_request('GET', path, add_header=True)
