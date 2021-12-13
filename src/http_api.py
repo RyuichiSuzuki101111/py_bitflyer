@@ -315,5 +315,5 @@ class Context:
         """
         Send the getbankaccounts request.
         """
-        path = '/v1/me/getcoinouts'
+        path = '/v1/me/getbankaccounts'
         return self.send_request('GET', path, add_header=True)
