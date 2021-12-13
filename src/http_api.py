@@ -169,7 +169,6 @@ class Context:
         return request(method, url, data=data_str, headers=headers)
 
     def _get_regionwise_path(self, base_path: str) -> str:
-        # REVIEW: This probably works fine.
         match self.region:
             case 'JP':
                 return base_path
@@ -182,7 +181,7 @@ class Context:
 
     def getboard(self, *, product_code: str = None, alias: str = None) -> Response:
         """
-        Send the getboard request.
+        Send getboard request.
         If specified, product_code or alias are used in preference to the context.
         """
         path = '/v1/getboard'
@@ -192,7 +191,7 @@ class Context:
 
     def getticker(self, *, product_code: str = None, alias: str = None) -> Response:
         """
-        Send the getticker request.
+        Send getticker request.
         If specified, product_code or alias are used in preference to the context.
         """
         path = '/v1/getticker'
@@ -203,7 +202,7 @@ class Context:
     def getexecutions(self, *, product_code: str = None, alias: str = None,
                       count: int = None, before: int = None, after: int = None) -> Response:
         """
-        Send the getexecutions request.
+        Send getexecutions request.
         If specified, product_code or alias are used in preference to the context.
         """
         path = '/v1/getexecutions'
@@ -216,7 +215,7 @@ class Context:
 
     def getboardstate(self, *, product_code: str = None, alias: str = None) -> Response:
         """
-        Send the getboardstate request.
+        Send getboardstate request.
         If specified, product_code or alias are used in preference to the context.
         """
         path = '/v1/getboardstate'
@@ -226,7 +225,7 @@ class Context:
 
     def gethealth(self, *, product_code: str = None, alias: str = None) -> Response:
         """
-        Send the getboardstate request.
+        Send getboardstate request.
         If specified, product_code or alias are used in preference to the context.
         """
         path = '/v1/gethealth'
@@ -236,14 +235,14 @@ class Context:
 
     def getcorporateleverage(self) -> Response:
         """
-        Send the getcorporateleverage request.
+        Send getcorporateleverage request.
         """
         path = '/v1/getcorporateleverage'
         return self.send_request('GET', path)
 
     def getchats(self, from_date: str = None) -> Response:
         """
-        Send the getchats request.
+        Send getchats request.
         query parameter from_date is expected to be of the form 'yyyy-mm-dd'.
         """
         if from_date is not None:
@@ -256,35 +255,35 @@ class Context:
 
     def me_getpermissions(self) -> Response:
         """
-        Send the getpermissions request.
+        Send getpermissions request.
         """
         path = '/v1/me/getpermissionss'
         return self.send_request('GET', path, add_headers=True)
 
     def me_getbalance(self) -> Response:
         """
-        Send the getpermissions request.
+        Send getpermissions request.
         """
         path = '/v1/me/getbalance'
         return self.send_request('GET', path, add_headers=True)
 
     def me_getcollateral(self) -> Response:
         """
-        Send the getcollateral request.
+        Send getcollateral request.
         """
         path = '/v1/me/getcollateral'
         return self.send_request('GET', path, add_headers=True)
 
     def me_getcollateralaccounts(self) -> Response:
         """
-        Send the getcollateralaccounts request.
+        Send getcollateralaccounts request.
         """
         path = '/v1/me/getcollateralaccounts'
         return self.send_request('GET', path, add_headers=True)
 
     def me_getaddresses(self) -> Response:
         """
-        Send the getaddresses request.
+        Send getaddresses request.
         """
         path = '/v1/me/getaddresses'
         return self.send_request('GET', path, add_headers=True)
@@ -293,7 +292,7 @@ class Context:
                       before: int = None,
                       after: int = None) -> Response:
         """
-        Send the getcoinins request.
+        Send getcoinins request.
         """
         path = '/v1/me/getcoinins'
         query = {key: value for key, value
@@ -304,7 +303,7 @@ class Context:
                        before: int = None,
                        after: int = None) -> Response:
         """
-        Send the getcoinouts request.
+        Send getcoinouts request.
         """
         path = '/v1/me/getcoinouts'
         query = {key: value for key, value
@@ -313,7 +312,7 @@ class Context:
 
     def me_getbankaccounts(self):
         """
-        Send the getbankaccounts request.
+        Send getbankaccounts request.
         """
         path = '/v1/me/getbankaccounts'
         return self.send_request('GET', path, add_header=True)
@@ -322,14 +321,14 @@ class Context:
                        before: int = None,
                        after: int = None):
         """
-        Send the getdeposits request.
+        Send getdeposits request.
         """
         path = '/v1/me/getdeposits'
         return self.send_request('GET', path, add_header=True)
 
     def me_withdraw(self, currency_code: Literal['JPY'], bank_account_id: int, amount: int, code: str):
         """
-        Send the withdraw request.
+        Send withdraw request.
         """
         data = {
             'currency_code': currency_code,
@@ -342,7 +341,7 @@ class Context:
 
     def me_getwithdraws(self, count: int = None, before: int = None, after: int = None, message_id: str = None):
         """
-        Send the getwithdraws request.
+        Send getwithdraws request.
         """
         path = '/v1/me/getwithdraws'
         query = {key: value for key, value
