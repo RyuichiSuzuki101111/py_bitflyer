@@ -3,7 +3,7 @@ from datetime import datetime
 from hashlib import sha256
 from hmac import HMAC
 from itertools import chain
-from typing import Final, Generator, Literal
+from typing import Final, Generator, Literal, overload
 from urllib.parse import urlencode
 
 from requests import Response, request
@@ -349,3 +349,43 @@ class Context:
         if message_id is not None:
             query['message_id'] = message_id
         return self.send_request('GET', path, query, add_headers=True)
+
+    @overload
+    def me_sendchildorder(self, child_order_type: Literal['LIMIT'],
+                          side: Literal['BUY', 'SELL'],
+                          size: float,
+                          price: float, *,
+                          minute_to_expire: int = None,
+                          time_in_force: Literal['GTC', 'IOC', 'FOC'] = None) -> Response:
+        pass
+
+    @overload
+    def me_sendchildorder(self, child_order_type: Literal['MARKET'],
+                          side: Literal['BUY', 'SELL'],
+                          size: float, *,
+                          minute_to_expire: int = None,
+                          time_in_force: Literal['GTC', 'IOC', 'FOC'] = None) -> Response:
+        pass
+
+    def me_sendchildorder(self, child_order_type: Literal['LIMIT', 'MARKET'],
+                          side: Literal['BUY', 'SELL'],
+                          size: float,
+                          price: int = None,
+                          **kwargs) -> Response:
+
+        path = '/v1/me/sendchildorder'
+        data = {
+            'product_code': self.market.product_code,
+            'child_order_type': child_order_type,
+            'side': side,
+            'size': size
+        }
+
+        if price is not None:
+            data['price'] = price
+
+        for key, value in kwargs.items():
+            if value is not None:
+                data[key] = value
+
+        return self.send_request('POST', path, data=data, add_headers=True)
