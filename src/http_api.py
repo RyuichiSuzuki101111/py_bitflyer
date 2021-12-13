@@ -288,3 +288,14 @@ class Context:
         """
         path = '/v1/me/getaddresses'
         return self.send_request('GET', path, add_headers=True)
+
+    def me_getcoinins(self, count: int = None,
+                      before: int = None,
+                      after: int = None) -> Response:
+        """
+        Send the getcoinins request.
+        """
+        path = '/v1/me/getcoinins'
+        query = {key: value for key, value
+                 in gen_pagenation(count, before, after)}
+        return self.send_request('GET', path, query, add_header=True)
