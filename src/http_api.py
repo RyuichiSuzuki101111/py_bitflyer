@@ -339,11 +339,11 @@ class Context:
         path = '/v1/me/withdraw'
         return self.send_request('POST', path, data=data, add_headers=True)
 
-    def me_getwithdraws(self, count: int = None, before: int = None, after: int = None, message_id: str = None):
+    def me_getwithdrawals(self, count: int = None, before: int = None, after: int = None, message_id: str = None):
         """
-        Send getwithdraws request.
+        Send getwithdrawals request.
         """
-        path = '/v1/me/getwithdraws'
+        path = '/v1/me/getwithdrawals'
         query = {key: value for key, value
                  in gen_pagenation(count, before, after)}
         if message_id is not None:
