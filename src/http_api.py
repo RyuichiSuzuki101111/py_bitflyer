@@ -2,6 +2,7 @@ import json
 from datetime import datetime
 from hashlib import sha256
 from hmac import HMAC
+from itertools import chain
 from typing import Final, Generator, Literal
 from urllib.parse import urlencode
 
@@ -207,11 +208,10 @@ class Context:
         """
         path = '/v1/getexecutions'
 
-        def gen_query():
-            yield from gen_market_data(self, product_code, alias)
-            yield from gen_pagenation(count, before, after)
+        query = {key: value for key, value in
+                 chain(gen_market_data(self, product_code, alias),
+                       gen_pagenation(count, before, after))}
 
-        query = {key: value for key, value in gen_query()}
         return self.send_request('GET', path, query)
 
     def getboardstate(self, *, product_code: str = None, alias: str = None) -> Response:
