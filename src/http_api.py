@@ -299,3 +299,21 @@ class Context:
         query = {key: value for key, value
                  in gen_pagenation(count, before, after)}
         return self.send_request('GET', path, query, add_header=True)
+
+    def me_getcoinouts(self, count: int = None,
+                       before: int = None,
+                       after: int = None) -> Response:
+        """
+        Send the getcoinouts request.
+        """
+        path = '/v1/me/getcoinouts'
+        query = {key: value for key, value
+                 in gen_pagenation(count, before, after)}
+        return self.send_request('GET', path, query, add_header=True)
+
+    def me_getbankaccounts(self):
+        """
+        Send the getbankaccounts request.
+        """
+        path = '/v1/me/getcoinouts'
+        return self.send_request('GET', path, add_header=True)
