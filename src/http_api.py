@@ -326,3 +326,16 @@ class Context:
         """
         path = '/v1/me/getdeposits'
         return self.send_request('GET', path, add_header=True)
+
+    def me_withdraw(self, currency_code: Literal['JPY'], bank_account_id: int, amount: int, code: str):
+        """
+        Send the withdraw request.
+        """
+        data = {
+            'currency_code': currency_code,
+            'bank_account_id': bank_account_id,
+            'amount': amount,
+            'code': code
+        }
+        path = '/v1/me/withdraw'
+        return self.send_request('POST', path, data=data, add_headers=True)
