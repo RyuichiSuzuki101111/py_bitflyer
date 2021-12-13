@@ -281,3 +281,10 @@ class Context:
         """
         path = '/v1/me/getcollateralaccounts'
         return self.send_request('GET', path, add_headers=True)
+
+    def me_getaddresses(self) -> Response:
+        """
+        Send the getaddresses request.
+        """
+        path = '/v1/me/getaddresses'
+        return self.send_request('GET', path, add_headers=True)
