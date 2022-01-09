@@ -147,8 +147,8 @@ class Context:
             'Content-Type': 'application/json'
         }
 
-    def send_request(self, method: str, path: str, query: dict = {},
-                     data: dict = {}, add_headers: bool = False) -> Response:
+    def _send_request(self, method: str, path: str, query: dict = {},
+                      data: dict = {}, add_headers: bool = False) -> Response:
 
         url = f'{self.endpoint}{path}'
 
@@ -167,6 +167,12 @@ class Context:
             headers = None
 
         return request(method, url, data=data_str, headers=headers)
+
+    def send_public_request(self, method: str, path: str, query: dict = {}, data: dict = {}):
+        return self._send_request(method, path, query, data, False)
+
+    def send_private_request(self, method: str, path: str, query: dict = {}, data: dict = {}):
+        return self._send_request(method, path, query, data, True)
 
     def _get_regionwise_path(self, base_path: str) -> str:
         match self.region:
@@ -187,7 +193,7 @@ class Context:
         path = '/v1/getboard'
         query = {key: value for key, value in
                  gen_market_data(self, product_code, alias)}
-        return self.send_request('GET', path, query)
+        return self.send_public_request('GET', path, query)
 
     def getticker(self, *, product_code: str = None, alias: str = None) -> Response:
         """
@@ -197,7 +203,7 @@ class Context:
         path = '/v1/getticker'
         query = {key: value for key, value in
                  gen_market_data(self, product_code, alias)}
-        return self.send_request('GET', path, query)
+        return self.send_public_request('GET', path, query)
 
     def getexecutions(self, *, product_code: str = None, alias: str = None,
                       count: int = None, before: int = None, after: int = None) -> Response:
@@ -211,7 +217,7 @@ class Context:
                  chain(gen_market_data(self, product_code, alias),
                        gen_pagenation(count, before, after))}
 
-        return self.send_request('GET', path, query)
+        return self.send_public_request('GET', path, query)
 
     def getboardstate(self, *, product_code: str = None, alias: str = None) -> Response:
         """
@@ -221,7 +227,7 @@ class Context:
         path = '/v1/getboardstate'
         query = {key: value for key, value in
                  gen_market_data(self, product_code, alias)}
-        return self.send_request('GET', path, query)
+        return self.send_public_request('GET', path, query)
 
     def gethealth(self, *, product_code: str = None, alias: str = None) -> Response:
         """
@@ -231,14 +237,14 @@ class Context:
         path = '/v1/gethealth'
         query = {key: value for key, value in
                  gen_market_data(self, product_code, alias)}
-        return self.send_request('GET', path, query)
+        return self.send_public_request('GET', path, query)
 
     def getcorporateleverage(self) -> Response:
         """
         Send getcorporateleverage request.
         """
         path = '/v1/getcorporateleverage'
-        return self.send_request('GET', path)
+        return self.send_public_request('GET', path)
 
     def getchats(self, from_date: str = None) -> Response:
         """
@@ -251,42 +257,42 @@ class Context:
             query = {}
 
         path = self._get_regionwise_path('/v1/getchats')
-        return self.send_request('GET', path, query)
+        return self.send_public_request('GET', path, query)
 
     def me_getpermissions(self) -> Response:
         """
         Send getpermissions request.
         """
         path = '/v1/me/getpermissionss'
-        return self.send_request('GET', path, add_headers=True)
+        return self.send_private_request('GET', path)
 
     def me_getbalance(self) -> Response:
         """
         Send getpermissions request.
         """
         path = '/v1/me/getbalance'
-        return self.send_request('GET', path, add_headers=True)
+        return self.send_private_request('GET', path)
 
     def me_getcollateral(self) -> Response:
         """
         Send getcollateral request.
         """
         path = '/v1/me/getcollateral'
-        return self.send_request('GET', path, add_headers=True)
+        return self.send_private_request('GET', path)
 
     def me_getcollateralaccounts(self) -> Response:
         """
         Send getcollateralaccounts request.
         """
         path = '/v1/me/getcollateralaccounts'
-        return self.send_request('GET', path, add_headers=True)
+        return self.send_private_request('GET', path)
 
     def me_getaddresses(self) -> Response:
         """
         Send getaddresses request.
         """
         path = '/v1/me/getaddresses'
-        return self.send_request('GET', path, add_headers=True)
+        return self.send_private_request('GET', path)
 
     def me_getcoinins(self, count: int = None,
                       before: int = None,
@@ -297,7 +303,7 @@ class Context:
         path = '/v1/me/getcoinins'
         query = {key: value for key, value
                  in gen_pagenation(count, before, after)}
-        return self.send_request('GET', path, query, add_header=True)
+        return self.send_private_request('GET', path, query)
 
     def me_getcoinouts(self, count: int = None,
                        before: int = None,
@@ -308,14 +314,14 @@ class Context:
         path = '/v1/me/getcoinouts'
         query = {key: value for key, value
                  in gen_pagenation(count, before, after)}
-        return self.send_request('GET', path, query, add_header=True)
+        return self.send_private_request('GET', path, query)
 
     def me_getbankaccounts(self):
         """
         Send getbankaccounts request.
         """
         path = '/v1/me/getbankaccounts'
-        return self.send_request('GET', path, add_header=True)
+        return self.send_private_request('GET', path)
 
     def me_getdeposits(self, count: int = None,
                        before: int = None,
@@ -323,8 +329,10 @@ class Context:
         """
         Send getdeposits request.
         """
+        query = {key: value for key, value
+                 in gen_pagenation(count, before, after)}
         path = '/v1/me/getdeposits'
-        return self.send_request('GET', path, add_header=True)
+        return self.send_private_request('GET', path, query)
 
     def me_withdraw(self, currency_code: Literal['JPY'], bank_account_id: int, amount: int, code: str):
         """
@@ -337,7 +345,7 @@ class Context:
             'code': code
         }
         path = '/v1/me/withdraw'
-        return self.send_request('POST', path, data=data, add_headers=True)
+        return self.send_private_request('POST', path, data=data)
 
     def me_getwithdrawals(self, count: int = None, before: int = None, after: int = None, message_id: str = None):
         """
@@ -348,7 +356,7 @@ class Context:
                  in gen_pagenation(count, before, after)}
         if message_id is not None:
             query['message_id'] = message_id
-        return self.send_request('GET', path, query, add_headers=True)
+        return self.send_private_request('GET', path, query)
 
     @overload
     def me_sendchildorder(self, child_order_type: Literal['LIMIT'],
@@ -388,4 +396,4 @@ class Context:
             if value is not None:
                 data[key] = value
 
-        return self.send_request('POST', path, data=data, add_headers=True)
+        return self.send_private_request('POST', path, data=data)
