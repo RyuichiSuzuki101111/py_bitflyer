@@ -117,6 +117,12 @@ class Context:
         if not (api_key is None or api_secret is None):
             self.set_api_key(api_key, api_secret)
 
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        pass
+
     @property
     def endpoint(self) -> str:
         match self.region:
@@ -183,7 +189,7 @@ class Context:
 
     def getmarket(self) -> Response:
         path = self._get_regionwise_path('/v1/markets')
-        return self.send_request('GET', path)
+        return self.send_public_request('GET', path)
 
     def getboard(self, *, product_code: str = None, alias: str = None) -> Response:
         """
