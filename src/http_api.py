@@ -3,7 +3,7 @@ from datetime import datetime
 from hashlib import sha256
 from hmac import HMAC
 from itertools import chain
-from typing import Final, Generator, Literal, overload
+from typing import Final, Generator, Literal, ParamSpec, TypeVar, overload
 from urllib.parse import urlencode
 
 from requests import Response, request
@@ -367,8 +367,8 @@ class Context:
     @overload
     def me_sendchildorder(self, child_order_type: Literal['LIMIT'],
                           side: Literal['BUY', 'SELL'],
-                          size: float,
-                          price: float, *,
+                          size: float, *,
+                          price: float,
                           minute_to_expire: int = None,
                           time_in_force: Literal['GTC', 'IOC', 'FOC'] = None) -> Response:
         pass
@@ -384,7 +384,6 @@ class Context:
     def me_sendchildorder(self, child_order_type: Literal['LIMIT', 'MARKET'],
                           side: Literal['BUY', 'SELL'],
                           size: float,
-                          price: int = None,
                           **kwargs) -> Response:
 
         path = '/v1/me/sendchildorder'
@@ -395,11 +394,97 @@ class Context:
             'size': size
         }
 
-        if price is not None:
-            data['price'] = price
-
         for key, value in kwargs.items():
             if value is not None:
                 data[key] = value
+
+        return self.send_private_request('POST', path, data=data)
+
+    @overload
+    def me_cancelchildorder(self, *, child_order_id: str) -> Response:
+        pass
+
+    @overload
+    def me_cancelchildorder(self, *, child_order_acceptance_id: str) -> Response:
+        pass
+
+    def me_cancelchildorder(self, **kwargs) -> Response:
+
+        assert len(kwargs) == 1
+        id_type, id = next(kwargs.items())
+
+        path = '/v1/me/cancelchildorder'
+        data = {
+            'product_code': self.market.product_code,
+            id_type: id
+        }
+
+        return self.send_private_request('POST', path, data=data)
+
+    @overload
+    def create_parentorder_parameter(self, condition_type: Literal['LIMIT'],
+                                     side: Literal['BUY', 'SELL'],
+                                     size: float, *,
+                                     price: float) -> dict:
+        pass
+
+    @overload
+    def create_parentorder_parameter(self, condition_type: Literal['Market'],
+                                     side: Literal['BUY', 'SELL'],
+                                     size: float):
+        pass
+
+    @overload
+    def create_parentorder_parameter(self, condition_type: Literal['STOP_LIMIT'],
+                                     side: Literal['BUY', 'SELL'],
+                                     size: float, *,
+                                     price: float,
+                                     trigger_price: float):
+        pass
+
+    @overload
+    def create_parentorder_parameter(self, condition_type: Literal['STOP'],
+                                     side: Literal['BUY', 'SELL'],
+                                     size: float, *,
+                                     trigger_price: float):
+        pass
+
+    @overload
+    def create_parentorder_parameter(self, condition_type: Literal['TRAIL'],
+                                     side: Literal['BUY', 'SELL'],
+                                     size: float, *,
+                                     offset: float):
+        pass
+
+    def create_parentorder_parameter(self, condition_type: Literal['LIMIT', 'MARKET', 'STOP', 'STOP_LIMIT', 'TRAIL'],
+                                     side: Literal['BUY', 'SELL'],
+                                     size: float,
+                                     **kwargs):
+
+        return dict(product_code=self.market.product_code,
+                    condition_type=condition_type,
+                    side=side,
+                    size=size, **kwargs)
+
+    def me_sendparentorder(self, order_method: Literal['SIMPLE', 'IFD', 'OCO', 'IFDOCO'],
+                           *parameters: dict,
+                           minute_to_expire: float = None,
+                           time_in_force: Literal['GTC', 'IOC', 'FOK'] = None):
+        """
+        Send sendparentorder request.
+        This method doesn't seem to work if 'order_method' is 'SIMPLE'.
+        """
+        path = '/v1/me/sendparentorder'
+
+        data = dict(
+            order_method=order_method,
+            parameters=list(parameters)
+        )
+
+        if minute_to_expire is not None:
+            data['minute_to_expire'] = minute_to_expire
+
+        if time_in_force is not None:
+            data['time_in_force'] = time_in_force
 
         return self.send_private_request('POST', path, data=data)
